@@ -294,7 +294,6 @@ radius = 5.0
 
 [node name="Player" type="CharacterBody2D" unique_id=2052652639]
 script = ExtResource("1_oul6g")
-sprite_sheet = ExtResource("2_g1dw6")
 side_art_faces_left = false
 
 [node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=1723692634]

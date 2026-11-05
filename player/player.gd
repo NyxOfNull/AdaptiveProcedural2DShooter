@@ -7,8 +7,7 @@ signal room_changed(room_id: int)   # -1 = not inside a room (corridor / doorway
 enum Facing { DOWN, UP, LEFT, RIGHT }
 
 @export_group("Art")
-@export var sprite_sheet: Texture2D
-@export var cell_size: int = 32
+
 ## Tick if the SIDE row of your sheet shows the character looking LEFT. Untick if it looks mirrored.
 @export var side_art_faces_left: bool = true
 
@@ -24,12 +23,6 @@ enum Facing { DOWN, UP, LEFT, RIGHT }
 
 @export_group("Body")
 @export var body_radius: float = 5.0
-
-# Animation table: name -> [row in the sheet, number of frames, frames per second]
-const ANIMATIONS := {
-	"idle_down": [0, 6, 5.0], "idle_side": [1, 6, 5.0], "idle_up": [2, 6, 5.0],
-	"walk_down": [3, 6, 10.0], "walk_side": [4, 6, 10.0], "walk_up": [5, 6, 10.0],
-}
 
 @onready var sprite: AnimatedSprite2D = $Sprite
 
@@ -53,13 +46,25 @@ func _ready() -> void:
 	collision_mask = 1                                   # and collides with layer 1 (walls)
 	_ensure_collision_shape()
 	_ensure_input_actions()
-	_build_animations()
+	sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	_check_animations()
 	_play_animation(false)
 
 	if has_dungeon:
 		dungeon.dungeon_generated.connect(_on_dungeon_generated)
 		if dungeon.get_start_room_id() >= 0:
 			spawn_at_start()
+
+
+const REQUIRED_ANIMATIONS := ["idle_down", "idle_side", "idle_up", "walk_down", "walk_side", "walk_up"]
+
+func _check_animations() -> void:
+	if sprite.sprite_frames == null:
+		push_error("[Player] Sprite has no SpriteFrames. Create them in the Inspector.")
+		return
+	for anim_name in REQUIRED_ANIMATIONS:
+		if not sprite.sprite_frames.has_animation(anim_name):
+			push_error("[Player] Missing animation: %s" % anim_name)
 
 
 func _on_dungeon_generated(_success: bool, _used_seed: int) -> void:
@@ -145,6 +150,8 @@ func _play_animation(moving: bool) -> void:
 			anim += "up"
 		_:
 			anim += "side"
+	if sprite.sprite_frames == null or not sprite.sprite_frames.has_animation(anim):
+		return
 	if sprite.animation != anim:
 		sprite.play(anim)
 
@@ -154,29 +161,6 @@ func _play_animation(moving: bool) -> void:
 		sprite.flip_h = not side_art_faces_left
 	elif facing == Facing.RIGHT:
 		sprite.flip_h = side_art_faces_left
-
-
-# Builds every animation from the sprite sheet using ANIMATIONS (no editor slicing needed).
-func _build_animations() -> void:
-	if sprite_sheet == null:
-		push_error("[Player] Assign the sprite sheet in the Inspector (Sprite Sheet).")
-		return
-	sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST   # crisp pixel art
-	var frames := SpriteFrames.new()
-	if frames.has_animation("default"):
-		frames.remove_animation("default")
-	for anim_name in ANIMATIONS:
-		var info: Array = ANIMATIONS[anim_name]
-		frames.add_animation(anim_name)
-		frames.set_animation_loop(anim_name, true)
-		frames.set_animation_speed(anim_name, info[2])
-		for i in range(info[1]):
-			var atlas := AtlasTexture.new()
-			atlas.atlas = sprite_sheet
-			atlas.region = Rect2(i * cell_size, info[0] * cell_size, cell_size, cell_size)
-			frames.add_frame(anim_name, atlas)
-	sprite.sprite_frames = frames
-
 
 # ---------------------------------------------------------------- room tracking / setup
 
