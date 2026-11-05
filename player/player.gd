@@ -26,6 +26,9 @@ enum Facing { DOWN, UP, LEFT, RIGHT }
 
 @onready var sprite: AnimatedSprite2D = $Sprite
 
+@onready var health: Health = $Health
+var dead := false
+
 var dungeon: Node
 var has_dungeon := false
 var facing: Facing = Facing.DOWN
@@ -55,8 +58,15 @@ func _ready() -> void:
 		if dungeon.get_start_room_id() >= 0:
 			spawn_at_start()
 
+	if health == null:
+		push_error("[Player] Add a child node named Health with health.gd attached.")
+	else:
+		health.damaged.connect(_on_damaged)
+		health.died.connect(_on_died)
+		health.health_changed.connect(_on_health_changed)
 
-const REQUIRED_ANIMATIONS := ["idle_down", "idle_side", "idle_up", "walk_down", "walk_side", "walk_up"]
+
+const REQUIRED_ANIMATIONS := ["idle_down", "idle_side", "idle_up", "walk_down", "walk_side", "walk_up", "death"]
 
 func _check_animations() -> void:
 	if sprite.sprite_frames == null:
@@ -83,12 +93,18 @@ func spawn_at_start() -> void:
 	_dash_left = 0.0
 	_dash_cd = 0.0
 	facing = Facing.DOWN
+	dead = false
+	if health != null:
+		health.reset()
 	current_room_id = -2          # forces room_changed to fire for the first room
 	_update_current_room()
 
 
 func _physics_process(delta: float) -> void:
 	# Don't move while typing in the seed box.
+	if dead:
+		velocity = Vector2.ZERO
+		return
 	var typing := get_viewport().gui_get_focus_owner() != null
 	var dir := Vector2.ZERO
 	if not typing:
@@ -107,6 +123,8 @@ func _physics_process(delta: float) -> void:
 	else:
 		if not typing and Input.is_action_just_pressed("dash") and _dash_cd <= 0.0 and dir != Vector2.ZERO:
 			_dash_vec = dir.normalized()
+			if health != null:
+				health.set_invulnerable(dash_time + 0.05)
 			_dash_left = dash_time
 			_dash_cd = dash_cooldown
 			velocity = _dash_vec * dash_speed
@@ -207,3 +225,33 @@ func _add_action_if_missing(action: StringName, keys: Array) -> void:
 		var event := InputEventKey.new()
 		event.physical_keycode = key
 		InputMap.action_add_event(action, event)
+
+
+# ---------------------------------------------------------------- health reactions
+
+func _on_damaged(_amount: float, _source: Node) -> void:
+	# Flash red, then fade back to normal.
+	sprite.modulate = Color(1.0, 0.35, 0.35)
+	create_tween().tween_property(sprite, "modulate", Color.WHITE, 0.2)
+
+
+func _on_died() -> void:
+	dead = true
+	sprite.flip_h = false
+	if sprite.sprite_frames != null and sprite.sprite_frames.has_animation("death"):
+		sprite.play("death")
+
+
+func _on_health_changed(current: float, maximum: float) -> void:
+	print("[Player] HP %d / %d" % [int(current), int(maximum)])
+
+
+# TEMPORARY debug keys for testing: K = take 10 damage, J = heal 10. Remove later.
+func _unhandled_input(event: InputEvent) -> void:
+	var key := event as InputEventKey
+	if key == null or not key.pressed or key.echo or health == null:
+		return
+	if key.keycode == KEY_K:
+		health.take_damage(10.0, self)
+	elif key.keycode == KEY_J:
+		health.heal(10.0)
