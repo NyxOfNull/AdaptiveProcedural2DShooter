@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Icon: dagger
+  Set: Memory Icons
+  Author: Pictogrammers (https://github.com/Pictogrammers/Memory)
+  License: Apache 2.0 (https://github.com/Pictogrammers/Memory/blob/main/LICENSE)
+  Source: https://iconify.design
+-->
+<svg xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     viewBox="0 0 22 22"
+     width="22"
+     height="22">
+  <title>Pixel Art Sword Icon</title>
+  <metadata>
+    <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+             xmlns:dc="http://purl.org/dc/elements/1.1/"
+             xmlns:cc="http://creativecommons.org/ns#">
+      <cc:Work rdf:about="">
+        <dc:title>Pixel Art Sword Icon</dc:title>
+        <dc:description>A pixelated sword icon in a retro 8-bit style, ideal for video game design, app interfaces, or digital art projects. Perfect for RPGs, adventure games, or nostalgic gaming themes.</dc:description>
+        <dc:creator>
+          <cc:Agent>
+            <dc:title>Pictogrammers</dc:title>
+          </cc:Agent>
+        </dc:creator>
+        <dc:source>https://github.com/Pictogrammers/Memory</dc:source>
+        <dc:rights>
+          <cc:Agent>
+            <dc:title>Pictogrammers</dc:title>
+          </cc:Agent>
+        </dc:rights>
+        <cc:license rdf:resource="https://github.com/Pictogrammers/Memory/blob/main/LICENSE"/>
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+        <dc:subject>
+          <rdf:Bag>
+            <rdf:li>pixel-sword</rdf:li>
+            <rdf:li>8-bit-sword</rdf:li>
+            <rdf:li>retro-sword</rdf:li>
+            <rdf:li>pixel-art-weapon</rdf:li>
+            <rdf:li>gaming-icon</rdf:li>
+            <rdf:li>RPG-sword</rdf:li>
+            <rdf:li>adventure-game-icon</rdf:li>
+            <rdf:li>pixelated-weapon</rdf:li>
+            <rdf:li>retro-gaming</rdf:li>
+            <rdf:li>pixel-graphic</rdf:li>
+            <rdf:li>sword-icon</rdf:li>
+            <rdf:li>game-asset</rdf:li>
+            <rdf:li>pixel-weapon</rdf:li>
+            <rdf:li>8-bit-weapon</rdf:li>
+            <rdf:li>pixel-design</rdf:li>
+          </rdf:Bag>
+        </dc:subject>
+      </cc:Work>
+      <cc:License rdf:about="https://github.com/Pictogrammers/Memory/blob/main/LICENSE">
+        <dc:title>Apache 2.0 (Apache-2.0)</dc:title>
+      </cc:License>
+    </rdf:RDF>
+  </metadata>
+  <path fill="currentColor" d="M10 13h1v-1h1v-1h1v-1h1V9h1V8h1V7h1V5h-2v1h-1v1h-1v1h-1v1h-1v1h-1v1H9v1h1Zm-4 6H4v-1H3v-2h1v-1h1v-1h1v-1H5v-1H4v-2h1V9h2v1h1V9h1V8h1V7h1V6h1V5h1V4h1V3h5v5h-1v1h-1v1h-1v1h-1v1h-1v1h-1v1h-1v1h1v2h-1v1h-2v-1H9v-1H8v1H7v1H6Z"/>
+</svg>

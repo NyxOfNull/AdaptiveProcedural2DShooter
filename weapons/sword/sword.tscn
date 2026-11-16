@@ -1,0 +1,19 @@
+[gd_scene format=3 uid="uid://bfl4deysqaufc"]
+
+[ext_resource type="Script" uid="uid://4toqjv4o8bxp" path="res://weapons/melee_weapon.gd" id="1_w1idm"]
+[ext_resource type="Texture2D" uid="uid://d0exgaihg0cis" path="res://weapons/sword/sword.svg" id="2_304gn"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_py7os"]
+size = Vector2(20, 16)
+
+[node name="Sword" type="Node2D" unique_id=759991109]
+script = ExtResource("1_w1idm")
+weapon_name = "Sword"
+icon = ExtResource("2_304gn")
+
+[node name="Hitbox" type="Area2D" parent="." unique_id=1453783009]
+collision_layer = 0
+collision_mask = 4
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hitbox" unique_id=561499545]
+shape = SubResource("RectangleShape2D_py7os")

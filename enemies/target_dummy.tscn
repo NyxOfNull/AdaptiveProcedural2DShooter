@@ -1,0 +1,28 @@
+[gd_scene format=3 uid="uid://cvy1m7dpcgmid"]
+
+[ext_resource type="Script" uid="uid://cogp56ogkaw04" path="res://enemies/target_dummy.gd" id="1_fojcn"]
+[ext_resource type="Script" uid="uid://cy1mhiivmsr46" path="res://components/health.gd" id="3_bpx2l"]
+
+[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_32mb2"]
+load_path = "res://.godot/imported/icon.svg-218a8f2b3041327d8a5756f3a245f83b.ctex"
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_py7os"]
+radius = 7.0
+
+[node name="StaticBody2D" type="StaticBody2D" unique_id=176015113]
+collision_layer = 4
+collision_mask = 0
+script = ExtResource("1_fojcn")
+
+[node name="Sprite" type="Sprite2D" parent="." unique_id=1201474097]
+scale = Vector2(0.03, 0.03)
+texture = SubResource("CompressedTexture2D_32mb2")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=588797036]
+shape = SubResource("CircleShape2D_py7os")
+
+[node name="Health" type="Node" parent="." unique_id=616745048]
+script = ExtResource("3_bpx2l")
+max_health = 50.0
+invulnerability_time = 0.2
+metadata/_custom_type_script = "uid://cy1mhiivmsr46"

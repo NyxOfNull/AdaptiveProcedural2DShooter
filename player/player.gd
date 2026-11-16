@@ -15,6 +15,7 @@ enum Facing { DOWN, UP, LEFT, RIGHT }
 @export var max_speed: float = 110.0
 @export var acceleration: float = 900.0
 @export var friction: float = 1100.0
+@export_range(0.0, 1.0) var attack_move_multiplier: float = 0.4   # slower while swinging
 
 @export_group("Dash")
 @export var dash_speed: float = 280.0
@@ -24,10 +25,18 @@ enum Facing { DOWN, UP, LEFT, RIGHT }
 @export_group("Body")
 @export var body_radius: float = 5.0
 
+@export_group("Weapons")
+@export var starting_weapon: PackedScene
+@export var test_dummy_scene: PackedScene     # temporary, for testing only
+
 @onready var sprite: AnimatedSprite2D = $Sprite
 
 @onready var health: Health = $Health
 var dead := false
+
+@onready var weapon_holder: Node2D = $WeaponHolder
+var current_weapon: Weapon
+var attacking := false
 
 var dungeon: Node
 var has_dungeon := false
@@ -46,7 +55,7 @@ func _ready() -> void:
 	z_index = 1                                          # above tiles and start/exit markers
 	motion_mode = CharacterBody2D.MOTION_MODE_FLOATING   # top-down movement
 	collision_layer = 2                                  # the player lives on layer 2
-	collision_mask = 1                                   # and collides with layer 1 (walls)
+	collision_mask =  1 | 4                                  # and collides with layer 1 (walls)
 	_ensure_collision_shape()
 	_ensure_input_actions()
 	sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
@@ -64,9 +73,10 @@ func _ready() -> void:
 		health.damaged.connect(_on_damaged)
 		health.died.connect(_on_died)
 		health.health_changed.connect(_on_health_changed)
+	equip_weapon(starting_weapon)
 
 
-const REQUIRED_ANIMATIONS := ["idle_down", "idle_side", "idle_up", "walk_down", "walk_side", "walk_up", "death"]
+const REQUIRED_ANIMATIONS := ["idle_down", "idle_side", "idle_up", "walk_down", "walk_side", "walk_up", "death", "attack_sword_down", "attack_sword_side", "attack_sword_up"]
 
 func _check_animations() -> void:
 	if sprite.sprite_frames == null:
@@ -96,6 +106,7 @@ func spawn_at_start() -> void:
 	dead = false
 	if health != null:
 		health.reset()
+	attacking = false
 	current_room_id = -2          # forces room_changed to fire for the first room
 	_update_current_room()
 
@@ -115,6 +126,7 @@ func _physics_process(delta: float) -> void:
 	if to_mouse.length() > 1.0:
 		aim_dir = to_mouse.normalized()
 
+	var speed := max_speed * (attack_move_multiplier if attacking else 1.0)
 	_dash_cd = maxf(0.0, _dash_cd - delta)
 
 	if _dash_left > 0.0:
@@ -129,13 +141,14 @@ func _physics_process(delta: float) -> void:
 			_dash_cd = dash_cooldown
 			velocity = _dash_vec * dash_speed
 		elif dir != Vector2.ZERO:
-			velocity = velocity.move_toward(dir * max_speed, acceleration * delta)
+			velocity = velocity.move_toward(dir * speed, acceleration * delta)
 		else:
 			velocity = velocity.move_toward(Vector2.ZERO, friction * delta)
 
 	move_and_slide()
-	_update_facing(dir)
-	_play_animation(velocity.length() > 10.0)
+	if not attacking:
+		_update_facing(dir)
+		_play_animation(velocity.length() > 10.0)
 	_update_current_room()
 
 
@@ -159,26 +172,31 @@ func _update_facing(dir: Vector2) -> void:
 			facing = Facing.DOWN if dir.y > 0.0 else Facing.UP
 
 
-func _play_animation(moving: bool) -> void:
-	var anim := "walk_" if moving else "idle_"
+func _facing_suffix() -> String:
 	match facing:
 		Facing.DOWN:
-			anim += "down"
+			return "down"
 		Facing.UP:
-			anim += "up"
-		_:
-			anim += "side"
-	if sprite.sprite_frames == null or not sprite.sprite_frames.has_animation(anim):
-		return
-	if sprite.animation != anim:
-		sprite.play(anim)
+			return "up"
+	return "side"
 
-	# One side row serves both left and right, so mirror it when needed.
+
+# One side row serves both left and right, so mirror it when needed.
+func _apply_side_flip() -> void:
 	sprite.flip_h = false
 	if facing == Facing.LEFT:
 		sprite.flip_h = not side_art_faces_left
 	elif facing == Facing.RIGHT:
 		sprite.flip_h = side_art_faces_left
+
+
+func _play_animation(moving: bool) -> void:
+	var anim := ("walk_" if moving else "idle_") + _facing_suffix()
+	if sprite.sprite_frames == null or not sprite.sprite_frames.has_animation(anim):
+		return
+	if sprite.animation != anim:
+		sprite.play(anim)
+	_apply_side_flip()
 
 # ---------------------------------------------------------------- room tracking / setup
 
@@ -215,6 +233,12 @@ func _ensure_input_actions() -> void:
 	_add_action_if_missing("move_up", [KEY_W, KEY_UP])
 	_add_action_if_missing("move_down", [KEY_S, KEY_DOWN])
 	_add_action_if_missing("dash", [KEY_SPACE])
+	
+	if not InputMap.has_action("attack"):
+		InputMap.add_action("attack")
+		var click := InputEventMouseButton.new()
+		click.button_index = MOUSE_BUTTON_LEFT
+		InputMap.action_add_event("attack", click)
 
 
 func _add_action_if_missing(action: StringName, keys: Array) -> void:
@@ -248,10 +272,69 @@ func _on_health_changed(current: float, maximum: float) -> void:
 
 # TEMPORARY debug keys for testing: K = take 10 damage, J = heal 10. Remove later.
 func _unhandled_input(event: InputEvent) -> void:
-	var key := event as InputEventKey
-	if key == null or not key.pressed or key.echo or health == null:
+	if event.is_action_pressed("attack"):
+		_try_attack()
 		return
-	if key.keycode == KEY_K:
+	var key := event as InputEventKey
+	if key == null or not key.pressed or key.echo:
+		return
+	# TEMPORARY debug keys: K = take 10 damage, J = heal 10, T = spawn a target dummy.
+	if key.keycode == KEY_K and health != null:
 		health.take_damage(10.0, self)
-	elif key.keycode == KEY_J:
+	elif key.keycode == KEY_J and health != null:
 		health.heal(10.0)
+	elif key.keycode == KEY_T and test_dummy_scene != null and has_dungeon:
+		var dummy := test_dummy_scene.instantiate()
+		dummy.position = position + _cardinal(aim_dir) * 48.0
+		dungeon.add_child(dummy)
+
+
+
+# ---------------------------------------------------------------- weapons
+
+func equip_weapon(scene: PackedScene) -> void:
+	if current_weapon != null:
+		current_weapon.queue_free()
+		current_weapon = null
+	if scene == null:
+		return
+	var weapon := scene.instantiate() as Weapon
+	if weapon == null:
+		push_error("[Player] That scene's root does not extend Weapon.")
+		return
+	weapon_holder.add_child(weapon)
+	weapon.owner_player = self
+	current_weapon = weapon
+
+
+func _try_attack() -> void:
+	if dead or attacking or current_weapon == null:
+		return
+	var dir := _cardinal(aim_dir)            # snap the cursor direction to 4 ways
+	if not current_weapon.try_attack(dir):   # cooldown not ready
+		return
+
+	# Face the cursor for the swing.
+	if dir.x > 0.0:
+		facing = Facing.RIGHT
+	elif dir.x < 0.0:
+		facing = Facing.LEFT
+	elif dir.y > 0.0:
+		facing = Facing.DOWN
+	else:
+		facing = Facing.UP
+
+	attacking = true
+	var anim := "attack_%s_%s" % [current_weapon.animation_name, _facing_suffix()]
+	if sprite.sprite_frames != null and sprite.sprite_frames.has_animation(anim):
+		sprite.play(anim)
+		_apply_side_flip()
+	await get_tree().create_timer(current_weapon.attack_duration).timeout
+	attacking = false
+
+
+# Turns any direction into the nearest of up / down / left / right.
+func _cardinal(v: Vector2) -> Vector2:
+	if absf(v.x) > absf(v.y):
+		return Vector2(signf(v.x), 0.0)
+	return Vector2(0.0, signf(v.y))

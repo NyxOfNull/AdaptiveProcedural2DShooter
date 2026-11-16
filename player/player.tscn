@@ -2,8 +2,58 @@
 
 [ext_resource type="Script" uid="uid://dolakeupuk630" path="res://player/player.gd" id="1_oul6g"]
 [ext_resource type="Texture2D" uid="uid://cvdh13sdp66rg" path="res://player/Player.png" id="2_g1dw6"]
+[ext_resource type="PackedScene" uid="uid://bfl4deysqaufc" path="res://weapons/sword/sword.tscn" id="2_qjkh3"]
 [ext_resource type="Script" uid="uid://bgtavmgrexqlw" path="res://Scripts/camera.gd" id="2_rkbax"]
+[ext_resource type="PackedScene" uid="uid://cvy1m7dpcgmid" path="res://enemies/target_dummy.tscn" id="3_g6k8r"]
 [ext_resource type="Script" uid="uid://cy1mhiivmsr46" path="res://components/health.gd" id="4_yw30f"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_fjxoa"]
+atlas = ExtResource("2_g1dw6")
+region = Rect2(0, 192, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_gswnw"]
+atlas = ExtResource("2_g1dw6")
+region = Rect2(32, 192, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_xcnuv"]
+atlas = ExtResource("2_g1dw6")
+region = Rect2(64, 192, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_j55il"]
+atlas = ExtResource("2_g1dw6")
+region = Rect2(96, 192, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_hjies"]
+atlas = ExtResource("2_g1dw6")
+region = Rect2(0, 224, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_mmwog"]
+atlas = ExtResource("2_g1dw6")
+region = Rect2(32, 224, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_8pxes"]
+atlas = ExtResource("2_g1dw6")
+region = Rect2(64, 224, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_fmu53"]
+atlas = ExtResource("2_g1dw6")
+region = Rect2(96, 224, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_w7j2h"]
+atlas = ExtResource("2_g1dw6")
+region = Rect2(0, 256, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_n0b8q"]
+atlas = ExtResource("2_g1dw6")
+region = Rect2(32, 256, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_jfgyi"]
+atlas = ExtResource("2_g1dw6")
+region = Rect2(64, 256, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_237xx"]
+atlas = ExtResource("2_g1dw6")
+region = Rect2(96, 256, 32, 32)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_55jnj"]
 atlas = ExtResource("2_g1dw6")
@@ -169,6 +219,57 @@ region = Rect2(160, 160, 32, 32)
 animations = [{
 "frames": [{
 "duration": 1.0,
+"texture": SubResource("AtlasTexture_fjxoa")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_gswnw")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_xcnuv")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_j55il")
+}],
+"loop": 0,
+"name": &"attack_sword_down",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_hjies")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_mmwog")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_8pxes")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_fmu53")
+}],
+"loop": 0,
+"name": &"attack_sword_side",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_w7j2h")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_n0b8q")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_jfgyi")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_237xx")
+}],
+"loop": 0,
+"name": &"attack_sword_up",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
 "texture": SubResource("AtlasTexture_55jnj")
 }, {
 "duration": 1.0,
@@ -329,11 +430,15 @@ radius = 5.0
 [node name="Player" type="CharacterBody2D" unique_id=2052652639]
 script = ExtResource("1_oul6g")
 side_art_faces_left = false
+starting_weapon = ExtResource("2_qjkh3")
+test_dummy_scene = ExtResource("3_g6k8r")
 
 [node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=1723692634]
 position = Vector2(0, -5)
 sprite_frames = SubResource("SpriteFrames_g1dw6")
-animation = &"death"
+animation = &"attack_sword_up"
+frame = 3
+frame_progress = 1.0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=224697544]
 shape = SubResource("CircleShape2D_rkbax")
@@ -343,3 +448,5 @@ script = ExtResource("2_rkbax")
 
 [node name="Health" type="Node2D" parent="." unique_id=1032500103]
 script = ExtResource("4_yw30f")
+
+[node name="WeaponHolder" type="Node2D" parent="." unique_id=592372182]
