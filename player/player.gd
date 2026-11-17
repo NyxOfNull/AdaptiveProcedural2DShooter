@@ -28,7 +28,6 @@ enum Facing { DOWN, UP, LEFT, RIGHT }
 @export_group("Weapons")
 @export var starting_weapon: PackedScene
 @export var test_dummy_scene: PackedScene     # temporary, for testing only
-@export var test_weapons: Array[PackedScene]   # TEMPORARY: keys 1-9 equip these
 
 @onready var sprite: AnimatedSprite2D = $Sprite
 
@@ -38,6 +37,9 @@ var dead := false
 @onready var weapon_holder: Node2D = $WeaponHolder
 var current_weapon: Weapon
 var attacking := false
+
+@onready var inventory: Inventory = get_node_or_null("Inventory")
+var _equip_after_attack := false
 
 var attack_held := false
 
@@ -76,7 +78,12 @@ func _ready() -> void:
 		health.damaged.connect(_on_damaged)
 		health.died.connect(_on_died)
 		health.health_changed.connect(_on_health_changed)
-	equip_weapon(starting_weapon)
+	if inventory != null:
+		inventory.selected_changed.connect(_on_selection_changed)
+		inventory.slot_changed.connect(_on_slot_changed)
+		_equip_selected()
+	else:
+		equip_weapon(starting_weapon)       # fallback when there is no Inventory node
 
 
 const REQUIRED_ANIMATIONS := ["idle_down", "idle_side", "idle_up", "walk_down", "walk_side", "walk_up", "death", "attack_sword_down", "attack_sword_side", "attack_sword_up"]
@@ -292,18 +299,27 @@ func _unhandled_input(event: InputEvent) -> void:
 		attack_held = false
 		return
 
+	# Mouse wheel cycles through the hotbar.
+	var mouse := event as InputEventMouseButton
+	if mouse != null and mouse.pressed and inventory != null:
+		if mouse.button_index == MOUSE_BUTTON_WHEEL_UP:
+			inventory.cycle(-1)
+		elif mouse.button_index == MOUSE_BUTTON_WHEEL_DOWN:
+			inventory.cycle(1)
+		return
+
 	var key := event as InputEventKey
 	if key == null or not key.pressed or key.echo:
 		return
 
-	# TEMPORARY: number keys equip test_weapons[0], [1], ...
+	# Number keys 1-9 pick a hotbar slot.
 	var number := int(key.keycode) - int(KEY_1)
-	if number >= 0 and number <= 8:
-		if number < test_weapons.size():
-			equip_weapon(test_weapons[number])
+	if inventory != null and number >= 0 and number < mini(9, inventory.slot_count):
+		inventory.select(number)
 		return
 
-	# TEMPORARY debug keys: K = take 10 damage, J = heal 10, T = spawn a target dummy.
+	# TEMPORARY debug keys: K = take damage, J = heal, T = spawn a target dummy,
+	# X = remove the selected item, Z = give the first starting item back.
 	if key.keycode == KEY_K and health != null:
 		health.take_damage(10.0, self)
 	elif key.keycode == KEY_J and health != null:
@@ -312,7 +328,10 @@ func _unhandled_input(event: InputEvent) -> void:
 		var dummy := test_dummy_scene.instantiate()
 		dummy.position = position + _cardinal(aim_dir) * 48.0
 		dungeon.add_child(dummy)
-
+	elif key.keycode == KEY_X and inventory != null:
+		inventory.remove_item(inventory.selected)
+	elif key.keycode == KEY_Z and inventory != null and not inventory.starting_items.is_empty():
+		inventory.add_item(inventory.starting_items[0])
 
 
 # ---------------------------------------------------------------- weapons
@@ -360,6 +379,9 @@ func _try_attack() -> void:
 		_apply_side_flip()
 	await get_tree().create_timer(current_weapon.attack_duration).timeout
 	attacking = false
+	if _equip_after_attack:
+		_equip_after_attack = false
+		_equip_selected()
 
 
 # Turns any direction into the nearest of up / down / left / right.
@@ -367,3 +389,24 @@ func _cardinal(v: Vector2) -> Vector2:
 	if absf(v.x) > absf(v.y):
 		return Vector2(signf(v.x), 0.0)
 	return Vector2(0.0, signf(v.y))
+
+
+
+# ---------------------------------------------------------------- inventory
+
+func _on_selection_changed(_index: int) -> void:
+	_equip_selected()
+
+
+func _on_slot_changed(index: int) -> void:
+	if index == inventory.selected:
+		_equip_selected()
+
+
+# Equips the item in the selected slot (an empty slot means unarmed).
+func _equip_selected() -> void:
+	if attacking:
+		_equip_after_attack = true          # never swap a weapon in the middle of a swing
+		return
+	var item := inventory.get_selected_item()
+	equip_weapon(item.weapon_scene if item != null else null)

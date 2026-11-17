@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="ItemData" format=3 uid="uid://bxsnds0x5qwen"]
+
+[ext_resource type="Texture2D" uid="uid://cyug1ho0fqqq0" path="res://weapons/sword/sword_icon.png" id="1_hl3xo"]
+[ext_resource type="Script" uid="uid://4lqtowd0rdoh" path="res://items/item_data.gd" id="1_hvni3"]
+[ext_resource type="PackedScene" uid="uid://bfl4deysqaufc" path="res://weapons/sword/sword.tscn" id="3_j3yu1"]
+
+[resource]
+script = ExtResource("1_hvni3")
+item_name = "Sword"
+icon = ExtResource("1_hl3xo")
+weapon_scene = ExtResource("3_j3yu1")
+metadata/_custom_type_script = "uid://4lqtowd0rdoh"

@@ -5,9 +5,13 @@
 [ext_resource type="PackedScene" uid="uid://bfl4deysqaufc" path="res://weapons/sword/sword.tscn" id="2_qjkh3"]
 [ext_resource type="Script" uid="uid://bgtavmgrexqlw" path="res://Scripts/camera.gd" id="2_rkbax"]
 [ext_resource type="PackedScene" uid="uid://cvy1m7dpcgmid" path="res://enemies/target_dummy.tscn" id="3_g6k8r"]
-[ext_resource type="PackedScene" uid="uid://dptstiqn625p3" path="res://weapons/pistol/pistol.tscn" id="4_boad6"]
 [ext_resource type="Script" uid="uid://cy1mhiivmsr46" path="res://components/health.gd" id="4_yw30f"]
-[ext_resource type="PackedScene" uid="uid://cjsnvqt3tonqc" path="res://weapons/pistol/shotgun.tscn" id="5_rgyib"]
+[ext_resource type="Script" uid="uid://d22qh7asusvos" path="res://components/inventory.gd" id="9_hg6s5"]
+[ext_resource type="Script" uid="uid://4lqtowd0rdoh" path="res://items/item_data.gd" id="10_yllr7"]
+[ext_resource type="Resource" uid="uid://bxsnds0x5qwen" path="res://items/sword_item.tres" id="11_kb6p2"]
+[ext_resource type="Resource" uid="uid://bx5r0sra7ko8r" path="res://items/shotgun_item.tres" id="12_wodsf"]
+[ext_resource type="Resource" uid="uid://b07ymc5d78xdk" path="res://items/pistol_item.tres" id="13_32hag"]
+[ext_resource type="PackedScene" uid="uid://bq1wi42k3seho" path="res://UI/hotbar.tscn" id="14_kb6p2"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_fjxoa"]
 atlas = ExtResource("2_g1dw6")
@@ -434,7 +438,6 @@ script = ExtResource("1_oul6g")
 side_art_faces_left = false
 starting_weapon = ExtResource("2_qjkh3")
 test_dummy_scene = ExtResource("3_g6k8r")
-test_weapons = Array[PackedScene]([ExtResource("2_qjkh3"), ExtResource("4_boad6"), ExtResource("5_rgyib")])
 
 [node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=1723692634]
 position = Vector2(0, -5)
@@ -453,3 +456,10 @@ script = ExtResource("2_rkbax")
 script = ExtResource("4_yw30f")
 
 [node name="WeaponHolder" type="Node2D" parent="." unique_id=592372182]
+
+[node name="Inventory" type="Node" parent="." unique_id=1917201846]
+script = ExtResource("9_hg6s5")
+starting_items = Array[ExtResource("10_yllr7")]([ExtResource("11_kb6p2"), ExtResource("12_wodsf"), ExtResource("13_32hag")])
+
+[node name="Hotbar" parent="." unique_id=1409805485 node_paths=PackedStringArray("inventory") instance=ExtResource("14_kb6p2")]
+inventory = NodePath("../Inventory")
