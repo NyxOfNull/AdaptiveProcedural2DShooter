@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://cneu8xynnfjkh" path="res://weapons/ranged_weapon.gd" id="1_nosnq"]
 [ext_resource type="PackedScene" uid="uid://cmvtdlna1t6hu" path="res://weapons/projectile.tscn" id="2_duhoc"]
-[ext_resource type="Texture2D" uid="uid://bnbnyycn7ewe0" path="res://weapons/pistol/pistol.png" id="2_og3ej"]
+[ext_resource type="Texture2D" uid="uid://ccsojeiip0txe" path="res://weapons/pistol/pistol.png" id="2_og3ej"]
 
 [node name="Pistol" type="Node2D" unique_id=190639479]
 script = ExtResource("1_nosnq")
@@ -20,4 +20,4 @@ faces_cursor = true
 texture = ExtResource("2_og3ej")
 
 [node name="Marker2D" type="Marker2D" parent="." unique_id=818207603]
-position = Vector2(9, -1)
+position = Vector2(7, 0)

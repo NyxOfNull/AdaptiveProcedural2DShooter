@@ -1,0 +1,20 @@
+[gd_scene format=3 uid="uid://de3ubbewofwr"]
+
+[ext_resource type="Script" uid="uid://bce32w7dtxher" path="res://weapons/projectile.gd" id="1_ua73s"]
+[ext_resource type="Texture2D" uid="uid://bm0iuluoehswi" path="res://weapons/projectiles/projectile_shotgun.png" id="2_rgk82"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_py7os"]
+radius = 1.0
+
+[node name="Projectile" type="Area2D" unique_id=1238702942]
+collision_layer = 0
+collision_mask = 5
+script = ExtResource("1_ua73s")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1387422922]
+shape = SubResource("CircleShape2D_py7os")
+
+[node name="Sprite2D" type="Sprite2D" parent="CollisionShape2D" unique_id=2108625714]
+position = Vector2(-0.15, -0.155)
+scale = Vector2(0.5, 0.5)
+texture = ExtResource("2_rgk82")

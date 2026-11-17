@@ -1,0 +1,24 @@
+[gd_scene format=3 uid="uid://cjsnvqt3tonqc"]
+
+[ext_resource type="Script" uid="uid://cneu8xynnfjkh" path="res://weapons/ranged_weapon.gd" id="1_51swq"]
+[ext_resource type="PackedScene" uid="uid://de3ubbewofwr" path="res://weapons/projectiles/porjectile_shotgun.tscn" id="2_51swq"]
+[ext_resource type="Texture2D" uid="uid://bnbnyycn7ewe0" path="res://weapons/pistol/shotgun.png" id="4_dw7v4"]
+
+[node name="Shotgun" type="Node2D" unique_id=190639479]
+script = ExtResource("1_51swq")
+projectile_scene = ExtResource("2_51swq")
+projectile_count = 5
+spread_degrees = 12.0
+weapon_name = "Shotgun"
+icon = ExtResource("4_dw7v4")
+damage = 6.0
+cooldown = 0.8
+animation_name = ""
+attack_duration = 0.0
+faces_cursor = true
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1167452829]
+texture = ExtResource("4_dw7v4")
+
+[node name="Marker2D" type="Marker2D" parent="." unique_id=818207603]
+position = Vector2(9, -1)
