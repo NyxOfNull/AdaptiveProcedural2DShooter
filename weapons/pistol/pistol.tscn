@@ -1,0 +1,23 @@
+[gd_scene format=3 uid="uid://dptstiqn625p3"]
+
+[ext_resource type="Script" uid="uid://cneu8xynnfjkh" path="res://weapons/ranged_weapon.gd" id="1_nosnq"]
+[ext_resource type="PackedScene" uid="uid://cmvtdlna1t6hu" path="res://weapons/projectile.tscn" id="2_duhoc"]
+[ext_resource type="Texture2D" uid="uid://bnbnyycn7ewe0" path="res://weapons/pistol/pistol.png" id="2_og3ej"]
+
+[node name="Pistol" type="Node2D" unique_id=190639479]
+script = ExtResource("1_nosnq")
+projectile_scene = ExtResource("2_duhoc")
+spread_degrees = 5.0
+weapon_name = "Pistol"
+icon = ExtResource("2_og3ej")
+damage = 8.0
+cooldown = 0.25
+animation_name = ""
+attack_duration = 0.0
+faces_cursor = true
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1167452829]
+texture = ExtResource("2_og3ej")
+
+[node name="Marker2D" type="Marker2D" parent="." unique_id=818207603]
+position = Vector2(9, -1)

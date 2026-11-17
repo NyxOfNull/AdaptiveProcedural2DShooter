@@ -28,6 +28,7 @@ enum Facing { DOWN, UP, LEFT, RIGHT }
 @export_group("Weapons")
 @export var starting_weapon: PackedScene
 @export var test_dummy_scene: PackedScene     # temporary, for testing only
+@export var test_weapons: Array[PackedScene]   # TEMPORARY: keys 1-9 equip these
 
 @onready var sprite: AnimatedSprite2D = $Sprite
 
@@ -37,6 +38,8 @@ var dead := false
 @onready var weapon_holder: Node2D = $WeaponHolder
 var current_weapon: Weapon
 var attacking := false
+
+var attack_held := false
 
 var dungeon: Node
 var has_dungeon := false
@@ -147,9 +150,18 @@ func _physics_process(delta: float) -> void:
 
 	move_and_slide()
 	if not attacking:
-		_update_facing(dir)
+		if current_weapon != null and current_weapon.faces_cursor:
+			_face_direction(_cardinal(aim_dir))      # guns: face the cursor, not the movement
+		else:
+			_update_facing(dir)
 		_play_animation(velocity.length() > 10.0)
-	_update_current_room()
+
+	# Hold-to-fire for automatic weapons.
+	if attack_held and current_weapon != null and current_weapon.automatic:
+		if Input.is_action_pressed("attack"):
+			_try_attack()
+		else:
+			attack_held = false
 
 
 # ---------------------------------------------------------------- facing / animation
@@ -273,11 +285,24 @@ func _on_health_changed(current: float, maximum: float) -> void:
 # TEMPORARY debug keys for testing: K = take 10 damage, J = heal 10. Remove later.
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("attack"):
+		attack_held = true
 		_try_attack()
 		return
+	if event.is_action_released("attack"):
+		attack_held = false
+		return
+
 	var key := event as InputEventKey
 	if key == null or not key.pressed or key.echo:
 		return
+
+	# TEMPORARY: number keys equip test_weapons[0], [1], ...
+	var number := int(key.keycode) - int(KEY_1)
+	if number >= 0 and number <= 8:
+		if number < test_weapons.size():
+			equip_weapon(test_weapons[number])
+		return
+
 	# TEMPORARY debug keys: K = take 10 damage, J = heal 10, T = spawn a target dummy.
 	if key.keycode == KEY_K and health != null:
 		health.take_damage(10.0, self)
@@ -307,14 +332,7 @@ func equip_weapon(scene: PackedScene) -> void:
 	current_weapon = weapon
 
 
-func _try_attack() -> void:
-	if dead or attacking or current_weapon == null:
-		return
-	var dir := _cardinal(aim_dir)            # snap the cursor direction to 4 ways
-	if not current_weapon.try_attack(dir):   # cooldown not ready
-		return
-
-	# Face the cursor for the swing.
+func _face_direction(dir: Vector2) -> void:
 	if dir.x > 0.0:
 		facing = Facing.RIGHT
 	elif dir.x < 0.0:
@@ -323,6 +341,17 @@ func _try_attack() -> void:
 		facing = Facing.DOWN
 	else:
 		facing = Facing.UP
+
+
+func _try_attack() -> void:
+	if dead or attacking or current_weapon == null:
+		return
+	var dir := _cardinal(aim_dir)
+	if not current_weapon.try_attack(dir, aim_dir):   # false while on cooldown
+		return
+	_face_direction(dir)
+	if current_weapon.animation_name == "":
+		return                                        # no attack animation (guns): keep moving freely
 
 	attacking = true
 	var anim := "attack_%s_%s" % [current_weapon.animation_name, _facing_suffix()]
