@@ -314,7 +314,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 	# Number keys 1-9 pick a hotbar slot.
 	var number := int(key.keycode) - int(KEY_1)
-	if inventory != null and number >= 0 and number < mini(9, inventory.slot_count):
+	if inventory != null and number >= 0 and number < mini(9, inventory.hotbar_size):
 		inventory.select(number)
 		return
 

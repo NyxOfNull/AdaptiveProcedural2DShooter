@@ -42,7 +42,7 @@ func _build() -> void:
 	gap.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	holder.add_child(gap)
 
-	for i in range(inventory.slot_count):
+	for i in range(inventory.hotbar_size):
 		var panel := PanelContainer.new()
 		panel.custom_minimum_size = slot_size
 		var icon := TextureRect.new()

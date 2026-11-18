@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://tg0r1jmjwmp6"]
+
+[ext_resource type="Script" uid="uid://bjx2nqeacesp1" path="res://UI/inventory_screen.gd" id="1_ixr6k"]
+
+[node name="InventoryScreen" type="CanvasLayer" unique_id=218099581]
+script = ExtResource("1_ixr6k")
